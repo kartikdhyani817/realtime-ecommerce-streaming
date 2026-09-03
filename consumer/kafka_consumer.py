@@ -2,6 +2,8 @@ import json
 
 from kafka import KafkaConsumer
 
+from processing.event_processor import process_event
+
 
 KAFKA_SERVER = "localhost:9092"
 KAFKA_TOPIC = "ecommerce_events"
@@ -25,7 +27,7 @@ def create_consumer():
 
 
 def consume_events():
-    """Read events from Kafka."""
+    """Read, process, and display events from Kafka."""
 
     consumer = create_consumer()
 
@@ -42,16 +44,27 @@ def consume_events():
 
         for message in consumer:
 
-            event = message.value
+            raw_event = message.value
 
-            print(
-                f"Received | "
-                f"Order: {event['order_id']} | "
-                f"Product: {event['product']} | "
-                f"Quantity: {event['quantity']} | "
-                f"Amount: ₹{event['total_amount']} | "
-                f"City: {event['city']}"
-            )
+            try:
+                # Validate and transform the Kafka event
+                event = process_event(raw_event)
+
+                print(
+                    f"Processed | "
+                    f"Order: {event['order_id']} | "
+                    f"Product: {event['product']} | "
+                    f"Quantity: {event['quantity']} | "
+                    f"Amount: ₹{event['total_amount']} | "
+                    f"City: {event['city']}"
+                )
+
+            except ValueError as error:
+
+                print(
+                    f"Invalid event | "
+                    f"Error: {error}"
+                )
 
     except KeyboardInterrupt:
 
