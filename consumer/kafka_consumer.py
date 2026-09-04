@@ -3,6 +3,7 @@ import json
 from kafka import KafkaConsumer
 
 from processing.event_processor import process_event
+from database.event_repository import save_event
 
 
 KAFKA_SERVER = "localhost:9092"
@@ -27,7 +28,7 @@ def create_consumer():
 
 
 def consume_events():
-    """Read, process, and display events from Kafka."""
+    """Read, process, and store events."""
 
     consumer = create_consumer()
 
@@ -36,6 +37,7 @@ def consume_events():
     print("=" * 60)
     print(f"Kafka Server : {KAFKA_SERVER}")
     print(f"Kafka Topic  : {KAFKA_TOPIC}")
+    print("Database     : realtime_ecommerce")
     print()
     print("Waiting for events...")
     print()
@@ -47,7 +49,8 @@ def consume_events():
             raw_event = message.value
 
             try:
-                # Validate and transform the Kafka event
+
+                # Step 1: Process the event
                 event = process_event(raw_event)
 
                 print(
@@ -59,11 +62,21 @@ def consume_events():
                     f"City: {event['city']}"
                 )
 
+                # Step 2: Save event to MySQL
+                save_event(event)
+
             except ValueError as error:
 
                 print(
                     f"Invalid event | "
                     f"Error: {error}"
+                )
+
+            except Exception as error:
+
+                print(
+                    f"Processing/Database Error | "
+                    f"{error}"
                 )
 
     except KeyboardInterrupt:
