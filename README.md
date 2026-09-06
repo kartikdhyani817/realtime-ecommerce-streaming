@@ -1,4 +1,4 @@
-h# Real-Time E-Commerce Streaming & Analytics Platform
+# Real-Time E-Commerce Streaming & Analytics Platform
 r
 A real-time data engineering project designed to simulate how e-commerce events can be generated, streamed, processed, stored, and eventually analysed.
 
