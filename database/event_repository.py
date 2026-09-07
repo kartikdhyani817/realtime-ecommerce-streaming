@@ -1,3 +1,5 @@
+import mysql.connector
+
 from database.db_connection import get_connection
 
 
@@ -25,10 +27,13 @@ VALUES (
 def save_event(event):
     """Save a processed event into MySQL."""
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    connection = None
+    cursor = None
 
     try:
+        connection = get_connection()
+        cursor = connection.cursor()
+
         cursor.execute(
             INSERT_QUERY,
             (
@@ -53,17 +58,38 @@ def save_event(event):
             f"{event['order_id']}"
         )
 
-    except Exception as error:
+        return True
 
-        connection.rollback()
+    except mysql.connector.IntegrityError as error:
 
-        print(
-            f"Database Error | {error}"
-        )
+        if error.errno == 1062:
+            print(
+                f"Database | Duplicate event ignored: "
+                f"{event['event_id']}"
+            )
 
-        raise
+            return False
+
+        print(f"Database Integrity Error | {error}")
+
+        if connection:
+            connection.rollback()
+
+        return False
+
+    except mysql.connector.Error as error:
+
+        print(f"Database Error | {error}")
+
+        if connection:
+            connection.rollback()
+
+        return False
 
     finally:
 
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()
+
+        if connection and connection.is_connected():
+            connection.close()
