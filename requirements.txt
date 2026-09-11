@@ -1,4 +1,4 @@
-pandas
+jpandas
 mysql-connector-python
 kafka-python
 pytest
