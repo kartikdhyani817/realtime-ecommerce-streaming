@@ -1,5 +1,5 @@
 # Real-Time E-Commerce Streaming Pipeline 🚀
-
+n
 A real-time data engineering project that simulates an e-commerce platform where customer order events are generated, streamed through Apache Kafka, processed using Python, and stored in MySQL for further analytics.
 
 This project demonstrates a complete **end-to-end streaming data pipeline** similar to real-world data engineering systems.
